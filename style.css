@@ -147,6 +147,7 @@ header {
     width: 100%;
     height: 100%;
     position: relative;
+    touch-action: none;
 }
 
 #tools-panel {
@@ -236,6 +237,7 @@ footer {
     border: 2px solid var(--paper-edge);
     transition: transform 0.1s ease;
     overflow: hidden;
+    touch-action: none;
 }
 
 .document:active {

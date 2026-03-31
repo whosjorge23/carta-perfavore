@@ -224,9 +224,10 @@ class Game {
         this.dom.stampApprove.addEventListener('click', () => this.handleStamp('APPROVE'));
         this.dom.stampDeny.addEventListener('click', () => this.handleStamp('DENY'));
 
-        this.dom.desk.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-        window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-        window.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        this.dom.desk.addEventListener('pointerdown', (e) => this.handlePointerDown(e));
+        window.addEventListener('pointermove', (e) => this.handlePointerMove(e));
+        window.addEventListener('pointerup', () => this.handlePointerUp());
+        window.addEventListener('pointercancel', () => this.handlePointerUp());
 
         this.dom.rulebookBtn.addEventListener('click', () => this.toggleRulebook(true));
         this.dom.closeRulebook.addEventListener('click', () => this.toggleRulebook(false));
@@ -299,18 +300,22 @@ class Game {
     activeDoc = null;
     offset = { x: 0, y: 0 };
 
-    handleMouseDown(e) {
+    handlePointerDown(e) {
         const doc = e.target.closest('.document');
         if (doc) {
+            e.preventDefault();
             this.activeDoc = doc;
             const rect = doc.getBoundingClientRect();
             this.offset.x = e.clientX - rect.left;
             this.offset.y = e.clientY - rect.top;
             doc.style.zIndex = 1000;
+            if (typeof doc.setPointerCapture === 'function') {
+                doc.setPointerCapture(e.pointerId);
+            }
         }
     }
 
-    handleMouseMove(e) {
+    handlePointerMove(e) {
         if (!this.activeDoc) return;
 
         const deskRect = this.dom.desk.getBoundingClientRect();
@@ -321,7 +326,7 @@ class Game {
         this.activeDoc.style.top = `${y}px`;
     }
 
-    handleMouseUp() {
+    handlePointerUp() {
         if (this.activeDoc) {
             this.activeDoc.style.zIndex = 10;
             this.activeDoc = null;
