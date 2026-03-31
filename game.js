@@ -112,14 +112,55 @@ class DocumentGenerator {
 }
 
 class RuleEngine {
-    constructor() {
-        this.currentRules = [
-            { id: 'EXPIRY', description: 'Documents must not be expired', check: (doc, today) => new Date(doc.expiry) >= today },
-            { id: 'ARSTOTZKA_ONLY', description: 'Only Arstotzka citizens allowed', check: (doc) => doc.country === 'Arstotzka' },
-            { id: 'BANNED_ISS', description: 'No entry for United Federation citizens', check: (doc) => doc.country !== 'United Federation' },
-            { id: 'AGE_CHECK', description: 'Travelers must be born before 1965', check: (doc) => new Date(doc.dob).getFullYear() < 1965 },
-            { id: 'ID_FORMAT', description: 'ID must be exactly 7 characters', check: (doc) => doc.id.length === 7 }
-        ];
+    constructor(gameDate) {
+        this.ruleCatalog = {
+            EXPIRY: { id: 'EXPIRY', description: 'Documents must not be expired', check: (doc, today) => new Date(doc.expiry) >= today },
+            ID_FORMAT: { id: 'ID_FORMAT', description: 'ID must be exactly 7 characters', check: (doc) => doc.id.length === 7 },
+            ARSTOTZKA_ONLY: { id: 'ARSTOTZKA_ONLY', description: 'Only Arstotzka citizens allowed', check: (doc) => doc.country === 'Arstotzka' },
+            NO_UNITED_FEDERATION: { id: 'NO_UNITED_FEDERATION', description: 'No entry for United Federation citizens', check: (doc) => doc.country !== 'United Federation' },
+            NO_KOLECHIA: { id: 'NO_KOLECHIA', description: 'No entry for Kolechia citizens', check: (doc) => doc.country !== 'Kolechia' },
+            NO_OBRISTAN: { id: 'NO_OBRISTAN', description: 'No entry for Obristan citizens', check: (doc) => doc.country !== 'Obristan' },
+            BORN_BEFORE_1965: { id: 'BORN_BEFORE_1965', description: 'Travelers must be born before 1965', check: (doc) => new Date(doc.dob).getFullYear() < 1965 },
+            BORN_BEFORE_1955: { id: 'BORN_BEFORE_1955', description: 'Travelers must be born before 1955', check: (doc) => new Date(doc.dob).getFullYear() < 1955 },
+            BORN_AFTER_1935: { id: 'BORN_AFTER_1935', description: 'Travelers must be born after 1935', check: (doc) => new Date(doc.dob).getFullYear() > 1935 },
+            SEX_M_ONLY: { id: 'SEX_M_ONLY', description: 'Only male travelers allowed today', check: (doc) => doc.sex === 'M' },
+            SEX_F_ONLY: { id: 'SEX_F_ONLY', description: 'Only female travelers allowed today', check: (doc) => doc.sex === 'F' },
+            ID_NO_DASH: { id: 'ID_NO_DASH', description: 'ID must not contain dashes', check: (doc) => !doc.id.includes('-') }
+        };
+
+        this.currentRules = [];
+        this.refreshRulesForDate(gameDate);
+    }
+
+    seededRandom(seed) {
+        let s = seed >>> 0;
+        return () => {
+            s = (s + 0x6D2B79F5) | 0;
+            let t = Math.imul(s ^ (s >>> 15), 1 | s);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    pickOne(list, rand) {
+        return list[Math.floor(rand() * list.length)];
+    }
+
+    refreshRulesForDate(date) {
+        const daySeed = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+        const rand = this.seededRandom(daySeed);
+
+        const fixedRules = ['EXPIRY', 'ID_FORMAT'];
+        const countryRule = this.pickOne(['ARSTOTZKA_ONLY', 'NO_UNITED_FEDERATION', 'NO_KOLECHIA', 'NO_OBRISTAN'], rand);
+        const ageRule = this.pickOne(['BORN_BEFORE_1965', 'BORN_BEFORE_1955', 'BORN_AFTER_1935'], rand);
+        const optionalSexRule = this.pickOne(['NONE', 'SEX_M_ONLY', 'SEX_F_ONLY'], rand);
+        const optionalExtraRule = this.pickOne(['NONE', 'ID_NO_DASH'], rand);
+
+        const selected = [...fixedRules, countryRule, ageRule];
+        if (optionalSexRule !== 'NONE') selected.push(optionalSexRule);
+        if (optionalExtraRule !== 'NONE') selected.push(optionalExtraRule);
+
+        this.currentRules = selected.map((id) => this.ruleCatalog[id]);
     }
 
     validate(doc, today) {
@@ -146,7 +187,7 @@ class Game {
             isDayActive: true
         };
 
-        this.rules = new RuleEngine();
+        this.rules = new RuleEngine(this.state.date);
         this.init();
     }
 
@@ -314,8 +355,10 @@ class Game {
         this.state.citations = 0;
         this.state.earnedToday = 0;
         this.state.isDayActive = true;
+        this.rules.refreshRulesForDate(this.state.date);
 
         this.dom.summaryOverlay.classList.add('hidden');
+        this.logMessage(`Daily bulletin updated. ${this.rules.currentRules.length} active rules.`);
         this.updateUI();
         this.spawnTraveler();
     }
@@ -349,7 +392,7 @@ class Game {
         const doc = document.createElement('div');
         doc.className = `document ${type}`;
         doc.style.left = '100px';
-        doc.style.top = '100px';
+        //doc.style.top = '100px';
 
         let content = `
             <div class="doc-header">${type.toUpperCase()}</div>
