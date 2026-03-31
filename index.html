@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta, Per Favore | Border Inspection Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <header id="game-header">
+            <div class="stats">
+                <div class="stat-item">DATE: <span id="game-date">MAR 12, 1982</span></div>
+                <div class="stat-item">CREDITS: <span id="game-credits">50</span></div>
+            </div>
+            <div id="game-title">CARTA, PER FAVORE</div>
+            <div class="stats">
+                <div class="stat-item">QUOTA: <span id="game-quota">0/10</span></div>
+            </div>
+        </header>
+
+        <main id="game-scene">
+            <div id="traveler-view">
+                <div id="booth-window">
+                    <div id="traveler-visual">
+                        <div class="avatar-placeholder"></div>
+                    </div>
+                </div>
+                <div id="booth-counter"></div>
+            </div>
+
+            <div id="desk-area">
+                <div id="document-drop-zone">
+                    <!-- Documents will be spawned here -->
+                </div>
+
+                <div id="tools-panel">
+                    <button id="rulebook-btn" class="tool-btn">RULES</button>
+                    <div id="stamp-controls">
+                        <button id="stamp-approve" class="stamp-btn approve">APPROVE</button>
+                        <button id="stamp-deny" class="stamp-btn deny">DENY</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer id="game-footer">
+            <div id="message-log">
+                <p>Welcome to the Grestin Border Checkpoint.</p>
+            </div>
+        </footer>
+    </div>
+
+    <div id="overlay-container">
+        <div id="rulebook-overlay" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2>MINISTRY OF ADMISSION</h2>
+                <h3>OFFICIAL RULES</h3>
+                <ul id="rules-list">
+                    <!-- Rules dynamically populated -->
+                </ul>
+            </div>
+        </div>
+
+        <div id="day-summary-overlay" class="modal hidden">
+            <div class="modal-content">
+                <h2>END OF DAY</h2>
+                <div id="summary-details">
+                    <p>CITATIONS ISSUED: <span id="summary-citations">0</span></p>
+                    <p>TOTAL EARNED: <span id="summary-earned">0</span></p>
+                    <p>RENT/FOOD/HEAT: -25</p>
+                    <hr>
+                    <p>NET BALANCE: <span id="summary-balance">0</span></p>
+                </div>
+                <button id="next-day-btn">NEXT DAY</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

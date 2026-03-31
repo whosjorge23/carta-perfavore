@@ -1,0 +1,389 @@
+:root {
+    --paper-base: #efe1bf;
+    --paper-dark: #d8bf8a;
+    --paper-edge: #b9975d;
+    --ink: #302317;
+    --ink-soft: #5a4630;
+    --seal-green: #2d6a4f;
+    --seal-red: #a52a2a;
+    --frame: #4f3a22;
+    --font-body: 'Special Elite', serif;
+    --font-title: 'IM Fell English SC', serif;
+    --shadow-heavy: 0 10px 20px rgba(0, 0, 0, 0.28);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+body {
+    background:
+        radial-gradient(circle at 14% 10%, rgba(255, 236, 204, 0.22), transparent 32%),
+        radial-gradient(circle at 86% 84%, rgba(174, 143, 96, 0.2), transparent 34%),
+        linear-gradient(120deg, #332517 0%, #2a1f14 48%, #1f1710 100%);
+    font-family: var(--font-body);
+    color: var(--ink);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-container {
+    width: min(1220px, 96vw);
+    height: min(820px, 95vh);
+    border: 6px solid #2e2214;
+    border-radius: 10px;
+    background:
+        linear-gradient(180deg, rgba(255, 247, 229, 0.93), rgba(236, 220, 186, 0.94)),
+        repeating-linear-gradient(0deg, rgba(126, 93, 54, 0.08) 0, rgba(126, 93, 54, 0.08) 2px, transparent 2px, transparent 6px);
+    box-shadow: var(--shadow-heavy);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+header {
+    min-height: 72px;
+    background: linear-gradient(180deg, #f4e6c7, #e5cc99);
+    border-bottom: 3px solid #4f3a22;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 22px;
+}
+
+#game-title {
+    font-family: var(--font-title);
+    font-size: clamp(1.8rem, 3.6vw, 2.5rem);
+    color: #3c2716;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 0 #f8edd5;
+}
+
+.stats {
+    display: flex;
+    gap: 14px;
+    font-size: 1rem;
+}
+
+.stat-item {
+    border: 2px solid #5b4328;
+    background: rgba(255, 246, 228, 0.7);
+    padding: 4px 8px;
+}
+
+#game-scene {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #c4b295 0%, #b79d78 100%);
+}
+
+#traveler-view {
+    height: 42%;
+    background:
+        radial-gradient(circle at 50% 5%, rgba(255, 237, 205, 0.26), transparent 40%),
+        linear-gradient(180deg, #66513a 0%, #3f3124 84%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 4px solid #2f2317;
+}
+
+#booth-window {
+    width: min(290px, 70vw);
+    height: min(220px, 55vw);
+    background: #281d13;
+    border: 10px solid #4a3420;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.6);
+}
+
+#traveler-visual,
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+}
+
+.avatar-placeholder {
+    background:
+        linear-gradient(to top, rgba(33, 25, 17, 0.9), rgba(52, 39, 27, 0.8)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 0.25s ease;
+}
+
+#booth-counter {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 24px;
+    background: linear-gradient(180deg, #6f573c, #4d3926);
+    border-top: 2px solid #2f2318;
+}
+
+#desk-area {
+    flex: 1;
+    background:
+        linear-gradient(145deg, #ebdbb8, #e0c99a),
+        repeating-linear-gradient(90deg, rgba(123, 91, 54, 0.08) 0, rgba(123, 91, 54, 0.08) 1px, transparent 1px, transparent 4px);
+    position: relative;
+    padding: 18px;
+    box-shadow: inset 0 6px 14px rgba(72, 51, 24, 0.28);
+}
+
+#document-drop-zone {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#tools-panel {
+    position: absolute;
+    right: 18px;
+    top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tool-btn,
+.stamp-btn,
+#next-day-btn {
+    font-family: var(--font-body);
+    padding: 8px 14px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: 2px solid #5a4123;
+    background: #f2dfb5;
+    color: #2f2113;
+    transition: transform 0.08s ease, filter 0.16s ease;
+}
+
+.tool-btn:active,
+.stamp-btn:active,
+#next-day-btn:active {
+    transform: translateY(2px);
+}
+
+#stamp-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.approve {
+    background: #e2f3d8;
+    border-color: #315331;
+    color: #1f3a1f;
+}
+
+.deny {
+    background: #f8d7cc;
+    border-color: #7a2f22;
+    color: #5e1f17;
+}
+
+.tool-btn:hover,
+.stamp-btn:hover,
+#next-day-btn:hover {
+    filter: brightness(1.05);
+}
+
+footer {
+    min-height: 58px;
+    background: linear-gradient(180deg, #ead3a7, #d6b980);
+    border-top: 3px solid #4f3920;
+    display: flex;
+    align-items: center;
+    padding: 8px 18px;
+}
+
+#message-log {
+    width: 100%;
+    max-height: 42px;
+    overflow-y: auto;
+    font-size: 0.98rem;
+    color: #203e2f;
+}
+
+#message-log p {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.document {
+    position: absolute;
+    background:
+        linear-gradient(180deg, #fff8e9 0%, #f3e2bf 92%),
+        repeating-linear-gradient(0deg, rgba(128, 88, 45, 0.08) 0, rgba(128, 88, 45, 0.08) 1px, transparent 1px, transparent 5px);
+    color: var(--ink);
+    box-shadow: 4px 6px 0 rgba(80, 58, 35, 0.35);
+    cursor: grab;
+    z-index: 10;
+    border: 2px solid var(--paper-edge);
+    transition: transform 0.1s ease;
+    overflow: hidden;
+}
+
+.document:active {
+    cursor: grabbing;
+    z-index: 1000 !important;
+    transform: scale(1.02) rotate(1deg);
+}
+
+.passport {
+    width: 220px;
+    min-height: 320px;
+    border-radius: 3px;
+}
+
+.doc-header {
+    background: linear-gradient(180deg, #8f6a3d, #684826);
+    color: #fbf0da;
+    padding: 6px;
+    text-align: center;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #4d361d;
+    letter-spacing: 1px;
+}
+
+.doc-body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.doc-photo {
+    width: 88px;
+    height: 112px;
+    border: 2px solid #6f5432;
+    align-self: center;
+    background: #d9c9a3;
+    overflow: hidden;
+}
+
+.doc-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.doc-info {
+    font-size: 0.93rem;
+    line-height: 1.18;
+    letter-spacing: 0.2px;
+}
+
+.doc-info p {
+    margin-bottom: 4px;
+}
+
+.doc-info strong {
+    color: #5b442b;
+    font-size: 0.86rem;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 10, 7, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    width: min(520px, 88vw);
+    border: 3px solid #5a4024;
+    background: linear-gradient(180deg, #fff3d4, #efd8a8);
+    color: #2a1e12;
+    padding: 18px;
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.35);
+}
+
+.modal-content h2 {
+    font-family: var(--font-title);
+    letter-spacing: 1px;
+}
+
+.modal-content h3 {
+    margin: 6px 0 10px;
+    color: #5c4224;
+}
+
+#rules-list {
+    margin-left: 18px;
+}
+
+#rules-list li {
+    margin-bottom: 6px;
+}
+
+.close-btn {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+#summary-details {
+    margin: 12px 0;
+}
+
+@media (max-width: 760px) {
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        border-width: 0;
+    }
+
+    header {
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px;
+    }
+
+    .stats {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #traveler-view {
+        height: 36%;
+    }
+
+    #booth-window {
+        width: 210px;
+        height: 156px;
+    }
+
+    .passport {
+        width: 190px;
+    }
+
+    #tools-panel {
+        right: 10px;
+        top: 10px;
+    }
+}
