@@ -27,6 +27,11 @@
 
         <main id="game-scene">
             <div id="traveler-view">
+                <aside id="wanted-board">
+                    <h4>WANTED TODAY</h4>
+                    <div id="wanted-face"></div>
+                    <p id="wanted-name">UNKNOWN</p>
+                </aside>
                 <div id="booth-window">
                     <div id="traveler-visual">
                         <div class="avatar-placeholder"></div>
@@ -46,6 +51,15 @@
                         <button id="stamp-approve" class="stamp-btn approve">APPROVE</button>
                         <button id="stamp-deny" class="stamp-btn deny">DENY</button>
                     </div>
+                </div>
+
+                <div id="dialogue-panel">
+                    <h4>INTERROGATE</h4>
+                    <div class="dialogue-actions">
+                        <button id="question-purpose" class="tool-btn">PURPOSE?</button>
+                        <button id="question-destination" class="tool-btn">DESTINATION?</button>
+                    </div>
+                    <p id="dialogue-answer">Ask a question to hear the traveler answer.</p>
                 </div>
             </div>
         </main>
@@ -80,6 +94,16 @@
                     <p>NET BALANCE: <span id="summary-balance">0</span></p>
                 </div>
                 <button id="next-day-btn">NEXT DAY</button>
+            </div>
+        </div>
+
+        <div id="briefing-overlay" class="modal hidden">
+            <div class="modal-content">
+                <h2>MORNING BRIEFING</h2>
+                <p>Policies for this shift:</p>
+                <ul id="briefing-rules"></ul>
+                <p id="briefing-wanted"></p>
+                <button id="start-shift-btn">START SHIFT</button>
             </div>
         </div>
     </div>
