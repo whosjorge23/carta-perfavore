@@ -2,8 +2,9 @@
  * Game Core Logic
  */
 
-const COUNTRIES = ["Arstotzka", "Kolechia", "Antegria", "Impor", "Obristan", "Republia", "United Federation"];
-const COMPANIES = ["Grestin Steel", "MOL Works", "Civic Rail", "Saint Marmero Depot"];
+const COUNTRIES = ["Roma", "Latium", "Gallia", "Hispania", "Aegyptus", "Syria", "Britannia"];
+const COMPANIES = ["Legio Ferrata Forge", "Forum Mercatorum", "Via Appia Carriers", "Ostia Granary Guild"];
+const CITIES = ["Roma", "Londinium", "Neapolis", "Mediolanum", "Capua", "Beneventum", "Pompeii"];
 
 const AVATAR_PROFILES = [
     { skin: "#f2d0b1", hair: "#3c2517", shirt: "#4b6f8f", bg: "#8a9d7a" },
@@ -47,8 +48,8 @@ function createAvatarImage(profile, variant = "doc") {
 
 class DocumentGenerator {
     static generateName() {
-        const first = ["Jorji", "Sergiu", "Dimitri", "Mikhail", "Ivan", "Natalya", "Elena", "Ludmila"];
-        const last = ["Costava", "Vuko", "Petrov", "Romanov", "Smirnov", "Ivanova", "Kuznetsov"];
+        const first = ["Marcus", "Lucius", "Gaius", "Tiberius", "Quintus", "Aurelia", "Livia", "Cornelia", "Antonia", "Flavia"];
+        const last = ["Julius", "Aemilius", "Claudius", "Cassius", "Fabius", "Valerius", "Tullius", "Sulpicius", "Octavius", "Horatius"];
         return `${first[Math.floor(Math.random() * first.length)]} ${last[Math.floor(Math.random() * last.length)]}`;
     }
 
@@ -73,10 +74,10 @@ class DocumentGenerator {
         const country = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
         const name = this.generateName();
         const id = this.generateID();
-        const dob = this.generateDate(1930, 1960);
-        const expiry = this.generateDate(1982, 1985);
+        const dob = this.generateDate(120, 155);
+        const expiry = this.generateDate(172, 176);
         const sex = Math.random() > 0.5 ? 'M' : 'F';
-        const destination = Math.random() > 0.5 ? 'Grestin' : 'East Grestin';
+        const destination = CITIES[Math.floor(Math.random() * CITIES.length)];
         const purpose = Math.random() > 0.45 ? 'visit' : 'work';
         const duration = purpose === 'work' ? '6 months' : '14 days';
 
@@ -108,7 +109,7 @@ class DocumentGenerator {
             })
         ];
 
-        const isForeigner = country !== 'Arstotzka';
+        const isForeigner = country !== 'Roma';
         if (!isForeigner || Math.random() > 0.1) {
             docs.push(this.addDoc('entry_permit', {
                 NAME: name,
@@ -124,16 +125,16 @@ class DocumentGenerator {
                 NAME: name,
                 ID: id,
                 COMPANY: COMPANIES[Math.floor(Math.random() * COMPANIES.length)],
-                UNTIL: this.generateDate(1982, 1983)
+                UNTIL: this.generateDate(172, 174)
             }));
         }
 
-        if (!dayPolicy.requireVaxCard || Math.random() > 0.15) {
-            docs.push(this.addDoc('vax_card', {
+        if (!dayPolicy.requireHealthOath || Math.random() > 0.15) {
+            docs.push(this.addDoc('health_oath', {
                 NAME: name,
                 ID: id,
-                VAX: 'POLIO',
-                DOSE: '2/2'
+                OATH: 'SWORN',
+                TEMPLE: 'AESCULAPIUS'
             }));
         }
 
@@ -153,15 +154,15 @@ class DocumentGenerator {
     static applyDiscrepancy(traveler, dayPolicy) {
         if (Math.random() < 0.45) return;
 
-        const types = ['EXPIRED', 'NAME_MISMATCH', 'ID_MISMATCH', 'MISSING_PERMIT', 'MISSING_WORK_PASS', 'MISSING_VAX'];
+        const types = ['EXPIRED', 'NAME_MISMATCH', 'ID_MISMATCH', 'MISSING_PERMIT', 'MISSING_WORK_PASS', 'MISSING_HEALTH_OATH'];
         const type = types[Math.floor(Math.random() * types.length)];
         const docs = traveler.documents;
         const passportDoc = docs.find((d) => d.type === 'passport');
 
         switch (type) {
             case 'EXPIRED':
-                traveler.document.expiry = '1981-01-01';
-                passportDoc.fields.EXP = '1981-01-01';
+                traveler.document.expiry = '0171-01-01';
+                passportDoc.fields.EXP = '0171-01-01';
                 break;
             case 'NAME_MISMATCH': {
                 const permit = docs.find((d) => d.type === 'entry_permit');
@@ -169,7 +170,7 @@ class DocumentGenerator {
                 break;
             }
             case 'ID_MISMATCH': {
-                const pass = docs.find((d) => d.type === 'work_pass') || docs.find((d) => d.type === 'vax_card');
+                const pass = docs.find((d) => d.type === 'work_pass') || docs.find((d) => d.type === 'health_oath');
                 if (pass) pass.fields.ID = 'BAD-777';
                 break;
             }
@@ -179,9 +180,9 @@ class DocumentGenerator {
             case 'MISSING_WORK_PASS':
                 traveler.documents = docs.filter((d) => d.type !== 'work_pass');
                 break;
-            case 'MISSING_VAX':
-                if (dayPolicy.requireVaxCard) {
-                    traveler.documents = docs.filter((d) => d.type !== 'vax_card');
+            case 'MISSING_HEALTH_OATH':
+                if (dayPolicy.requireHealthOath) {
+                    traveler.documents = docs.filter((d) => d.type !== 'health_oath');
                 }
                 break;
         }
@@ -193,13 +194,13 @@ class RuleEngine {
         this.ruleCatalog = {
             EXPIRY: { id: 'EXPIRY', description: 'Documents must not be expired', check: (passport, today) => new Date(passport.expiry) >= today },
             ID_FORMAT: { id: 'ID_FORMAT', description: 'ID must be exactly 7 characters', check: (passport) => passport.id.length === 7 },
-            ARSTOTZKA_ONLY: { id: 'ARSTOTZKA_ONLY', description: 'Only Arstotzka citizens allowed', check: (passport) => passport.country === 'Arstotzka' },
-            NO_UNITED_FEDERATION: { id: 'NO_UNITED_FEDERATION', description: 'No entry for United Federation citizens', check: (passport) => passport.country !== 'United Federation' },
-            NO_KOLECHIA: { id: 'NO_KOLECHIA', description: 'No entry for Kolechia citizens', check: (passport) => passport.country !== 'Kolechia' },
-            NO_OBRISTAN: { id: 'NO_OBRISTAN', description: 'No entry for Obristan citizens', check: (passport) => passport.country !== 'Obristan' },
-            BORN_BEFORE_1965: { id: 'BORN_BEFORE_1965', description: 'Travelers must be born before 1965', check: (passport) => new Date(passport.dob).getFullYear() < 1965 },
-            BORN_BEFORE_1955: { id: 'BORN_BEFORE_1955', description: 'Travelers must be born before 1955', check: (passport) => new Date(passport.dob).getFullYear() < 1955 },
-            BORN_AFTER_1935: { id: 'BORN_AFTER_1935', description: 'Travelers must be born after 1935', check: (passport) => new Date(passport.dob).getFullYear() > 1935 }
+            ROMA_ONLY: { id: 'ROMA_ONLY', description: 'Only Roma citizens allowed', check: (passport) => passport.country === 'Roma' },
+            NO_AEGYPTUS: { id: 'NO_AEGYPTUS', description: 'No entry for Aegyptus citizens', check: (passport) => passport.country !== 'Aegyptus' },
+            NO_GALLIA: { id: 'NO_GALLIA', description: 'No entry for Gallia citizens', check: (passport) => passport.country !== 'Gallia' },
+            NO_BRITANNIA: { id: 'NO_BRITANNIA', description: 'No entry for Britannia citizens', check: (passport) => passport.country !== 'Britannia' },
+            BORN_BEFORE_150: { id: 'BORN_BEFORE_150', description: 'Travelers must be born before year 150', check: (passport) => new Date(passport.dob).getFullYear() < 150 },
+            BORN_BEFORE_140: { id: 'BORN_BEFORE_140', description: 'Travelers must be born before year 140', check: (passport) => new Date(passport.dob).getFullYear() < 140 },
+            BORN_AFTER_125: { id: 'BORN_AFTER_125', description: 'Travelers must be born after year 125', check: (passport) => new Date(passport.dob).getFullYear() > 125 }
         };
 
         this.currentRules = [];
@@ -224,8 +225,8 @@ class RuleEngine {
         const daySeed = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
         const rand = this.seededRandom(daySeed);
         const fixedRules = ['EXPIRY', 'ID_FORMAT'];
-        const countryRule = this.pickOne(['ARSTOTZKA_ONLY', 'NO_UNITED_FEDERATION', 'NO_KOLECHIA', 'NO_OBRISTAN'], rand);
-        const ageRule = this.pickOne(['BORN_BEFORE_1965', 'BORN_BEFORE_1955', 'BORN_AFTER_1935'], rand);
+        const countryRule = this.pickOne(['ROMA_ONLY', 'NO_AEGYPTUS', 'NO_GALLIA', 'NO_BRITANNIA'], rand);
+        const ageRule = this.pickOne(['BORN_BEFORE_150', 'BORN_BEFORE_140', 'BORN_AFTER_125'], rand);
         this.currentRules = [...fixedRules, countryRule, ageRule].map((id) => this.ruleCatalog[id]);
     }
 
@@ -242,15 +243,17 @@ class Game {
     constructor() {
         this.state = {
             credits: 50,
-            date: new Date(1982, 10, 23),
+            date: new Date(172, 2, 12),
             quotaMet: 0,
             quotaTotal: 5,
             citations: 0,
             earnedToday: 0,
+            expensesToday: 25,
+            daySettled: false,
             currentTraveler: null,
             isDayActive: false,
             wanted: { profileIndex: 0, name: 'UNKNOWN' },
-            dayPolicy: { requireVaxCard: false }
+            dayPolicy: { requireHealthOath: false }
         };
 
         this.rules = new RuleEngine(this.state.date);
@@ -328,7 +331,7 @@ class Game {
         const rand = this.seededRandom(seed);
 
         this.state.dayPolicy = {
-            requireVaxCard: rand() > 0.5
+            requireHealthOath: rand() > 0.5
         };
 
         this.state.wanted = {
@@ -343,8 +346,8 @@ class Game {
 
     showBriefing() {
         const briefLines = this.rules.currentRules.map((r) => `<li>${r.description}</li>`);
-        if (this.state.dayPolicy.requireVaxCard) {
-            briefLines.push('<li>Vaccination card required for all entrants</li>');
+        if (this.state.dayPolicy.requireHealthOath) {
+            briefLines.push('<li>Temple Health Oath required for all entrants</li>');
         }
         this.dom.briefingRules.innerHTML = briefLines.join('');
         this.dom.briefingWanted.textContent = `Wanted criminal face posted. Name on file: ${this.state.wanted.name}.`;
@@ -364,7 +367,7 @@ class Game {
 
         let answer = '';
         if (kind === 'purpose') {
-            answer = t.purpose === 'work' ? 'I come to work in Grestin.' : 'I visit for family and tourism.';
+            answer = t.purpose === 'work' ? 'I come to work in Roma.' : 'I visit for family and trade.';
             if (t.lieProfile === 'evasive' && Math.random() > 0.55) answer = 'Uh... just visiting. Maybe work too. Not sure yet.';
         } else {
             answer = `I go to ${t.destination}.`;
@@ -426,11 +429,11 @@ class Game {
 
         const permit = docs.find((d) => d.type === 'entry_permit');
         const work = docs.find((d) => d.type === 'work_pass');
-        const vax = docs.find((d) => d.type === 'vax_card');
+        const healthOath = docs.find((d) => d.type === 'health_oath');
 
-        if (passport.country !== 'Arstotzka' && !permit) violations.push('MISSING_ENTRY_PERMIT');
+        if (passport.country !== 'Roma' && !permit) violations.push('MISSING_ENTRY_PERMIT');
         if (traveler.purpose === 'work' && !work) violations.push('MISSING_WORK_PASS');
-        if (this.state.dayPolicy.requireVaxCard && !vax) violations.push('MISSING_VAX_CARD');
+        if (this.state.dayPolicy.requireHealthOath && !healthOath) violations.push('MISSING_HEALTH_OATH');
         if (traveler.isWanted) violations.push('WANTED_CRIMINAL');
 
         const nameSet = new Set();
@@ -459,7 +462,7 @@ class Game {
 
     formatDate(date) {
         const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-        return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+        return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} AD`;
     }
 
     activeDoc = null;
@@ -497,7 +500,7 @@ class Game {
     toggleRulebook(show) {
         if (show) {
             const rows = this.rules.currentRules.map((r) => `<li>${r.description}</li>`);
-            if (this.state.dayPolicy.requireVaxCard) rows.push('<li>Vaccination card required for all entrants</li>');
+            if (this.state.dayPolicy.requireHealthOath) rows.push('<li>Temple Health Oath required for all entrants</li>');
             rows.push('<li>Deny wanted criminal face match</li>');
             this.dom.rulesList.innerHTML = rows.join('');
             this.dom.rulebookOverlay.classList.remove('hidden');
@@ -511,9 +514,12 @@ class Game {
         this.dom.summaryCitations.textContent = this.state.citations;
         this.dom.summaryEarned.textContent = this.state.earnedToday;
 
-        const expenses = 25;
-        const net = this.state.earnedToday - expenses;
-        this.dom.summaryBalance.textContent = net;
+        if (!this.state.daySettled) {
+            this.state.credits -= this.state.expensesToday;
+            this.state.daySettled = true;
+        }
+
+        this.dom.summaryBalance.textContent = this.state.credits;
         this.dom.summaryOverlay.classList.remove('hidden');
     }
 
@@ -522,6 +528,7 @@ class Game {
         this.state.quotaMet = 0;
         this.state.citations = 0;
         this.state.earnedToday = 0;
+        this.state.daySettled = false;
         this.state.currentTraveler = null;
         this.clearDesk();
         this.dom.summaryOverlay.classList.add('hidden');
@@ -560,7 +567,7 @@ class Game {
             passport: 'PASSPORT',
             entry_permit: 'ENTRY PERMIT',
             work_pass: 'WORK PASS',
-            vax_card: 'VACCINATION CARD'
+            health_oath: 'TEMPLE HEALTH OATH'
         };
 
         let topPhoto = '';
