@@ -403,6 +403,7 @@ class Game {
 
         const violations = this.validateTraveler(this.state.currentTraveler);
         const isActuallyValid = violations.length === 0;
+        const violationText = this.formatViolations(violations);
 
         let result = '';
         if (selection === 'APPROVE') {
@@ -412,13 +413,13 @@ class Game {
                 this.state.earnedToday += 10;
                 this.state.quotaMet++;
             } else {
-                result = `CITATION: Invalid traveler approved. ${violations.join(', ')}`;
+                result = `CITATION: Invalid traveler approved. Violations: ${violationText}`;
                 this.state.credits -= 15;
                 this.state.citations++;
             }
         } else {
             if (!isActuallyValid) {
-                result = 'Correct. Entry denied.';
+                result = `Correct. Entry denied. Violations: ${violationText}`;
                 this.state.credits += 10;
                 this.state.earnedToday += 10;
                 this.state.quotaMet++;
@@ -440,6 +441,28 @@ class Game {
         } else {
             setTimeout(() => this.spawnTraveler(), 900);
         }
+    }
+
+    formatViolations(violations) {
+        const labels = {
+            EXPIRY: 'Expired passport',
+            ID_FORMAT: 'Invalid ID format',
+            ROMA_ONLY: 'Only Roma citizens allowed today',
+            NO_AEGYPTUS: 'Aegyptus citizens are banned today',
+            NO_GALLIA: 'Gallia citizens are banned today',
+            NO_BRITANNIA: 'Britannia citizens are banned today',
+            BORN_BEFORE_150: 'Traveler too young for today\'s age rule',
+            BORN_BEFORE_140: 'Traveler too young for today\'s age rule',
+            BORN_AFTER_125: 'Traveler too old for today\'s age rule',
+            MISSING_ENTRY_PERMIT: 'Missing entry permit',
+            MISSING_WORK_PASS: 'Missing labor permit',
+            MISSING_HEALTH_OATH: 'Missing Temple Health Oath',
+            WANTED_CRIMINAL: 'Wanted face match',
+            NAME_MISMATCH_DOCS: 'Name mismatch across documents',
+            ID_MISMATCH_DOCS: 'ID mismatch across documents'
+        };
+
+        return violations.map((v) => labels[v] || v).join('; ');
     }
 
     validateTraveler(traveler) {

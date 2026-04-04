@@ -292,9 +292,9 @@ footer {
 }
 
 #message-log p {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
 }
 
 #dialogue-panel {
