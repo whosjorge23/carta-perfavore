@@ -21,26 +21,46 @@ function encodeSVG(svg) {
 }
 
 function createAvatarImage(profile, variant = "doc") {
-    const scale = variant === "booth" ? 1.2 : 1;
-    const eyeY = variant === "booth" ? 97 : 103;
+    const scale = variant === "booth" ? 1.15 : 1;
+    const eyeY = variant === "booth" ? 98 : 103;
+    const wreathY = variant === "booth" ? 72 : 76;
+    const accentPalette = ["#7a2330", "#2d4f78", "#3e6b4b", "#6f4a8e", "#8b5e2f", "#4e5f73"];
+    const stripeColor = accentPalette[Math.floor(Math.random() * accentPalette.length)];
+    const garmentBase = profile.shirt;
     const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="180" height="220" viewBox="0 0 180 220">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="${profile.bg}"/>
-      <stop offset="1" stop-color="#5d4935"/>
+      <stop offset="1" stop-color="#5f4b37"/>
+    </linearGradient>
+    <linearGradient id="toga" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5eedf"/>
+      <stop offset="1" stop-color="#d9c7a5"/>
     </linearGradient>
   </defs>
   <rect width="180" height="220" fill="url(#bg)"/>
-  <ellipse cx="90" cy="216" rx="84" ry="54" fill="${profile.shirt}"/>
+  <rect x="10" y="10" width="18" height="200" fill="#d6c3a0" opacity="0.26"/>
+  <rect x="152" y="10" width="18" height="200" fill="#d6c3a0" opacity="0.26"/>
+  <ellipse cx="90" cy="216" rx="84" ry="54" fill="${garmentBase}"/>
   <path d="M48 109 C48 58, 132 58, 132 109 L132 129 C132 164, 48 164, 48 129 Z" fill="${profile.skin}"/>
   <path d="M38 90 C39 50, 72 30, 103 36 C133 42, 143 67, 142 96 L131 93 C126 69, 112 58, 90 58 C69 58, 53 73, 48 96 Z" fill="${profile.hair}"/>
+  <path d="M58 ${wreathY} C72 ${wreathY - 12}, 108 ${wreathY - 12}, 122 ${wreathY}" fill="none" stroke="#8d7428" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="64" cy="${wreathY}" rx="3.2" ry="2.1" fill="#a78b35"/>
+  <ellipse cx="74" cy="${wreathY - 5}" rx="3.2" ry="2.1" fill="#a78b35"/>
+  <ellipse cx="84" cy="${wreathY - 7}" rx="3.2" ry="2.1" fill="#a78b35"/>
+  <ellipse cx="94" cy="${wreathY - 7}" rx="3.2" ry="2.1" fill="#a78b35"/>
+  <ellipse cx="104" cy="${wreathY - 5}" rx="3.2" ry="2.1" fill="#a78b35"/>
+  <ellipse cx="114" cy="${wreathY}" rx="3.2" ry="2.1" fill="#a78b35"/>
   <ellipse cx="70" cy="${eyeY}" rx="4" ry="4" fill="#1f1a16"/>
   <ellipse cx="110" cy="${eyeY}" rx="4" ry="4" fill="#1f1a16"/>
+  <path d="M90 108 L86 124 L94 124 Z" fill="#9f704a" opacity="0.5"/>
   <path d="M74 131 C84 138, 96 138, 106 131" fill="none" stroke="#4a3020" stroke-width="3" stroke-linecap="round"/>
   <rect x="72" y="145" width="36" height="20" rx="8" fill="${profile.skin}"/>
-  <rect x="58" y="163" width="64" height="57" fill="${profile.shirt}"/>
-  <rect x="78" y="164" width="24" height="57" fill="#f8f0e2" transform="scale(${scale},1)" transform-origin="90px 190px"/>
+  <path d="M44 173 C56 160, 76 158, 90 166 C104 158, 124 160, 136 173 L138 220 L42 220 Z" fill="url(#toga)"/>
+  <path d="M68 174 C82 185, 104 191, 120 220" fill="none" stroke="#c6b28f" stroke-width="3"/>
+  <path d="M80 171 L100 171 L97 220 L83 220 Z" fill="${stripeColor}" opacity="0.76" transform="scale(${scale},1)" transform-origin="90px 190px"/>
+  <circle cx="${variant === "booth" ? 96 : 100}" cy="182" r="4.7" fill="#b08d42" transform="scale(${scale},1)" transform-origin="90px 190px"/>
 </svg>`;
 
     return encodeSVG(svg.trim());
