@@ -298,6 +298,7 @@ class Game {
             stampApprove: document.getElementById('stamp-approve'),
             stampDeny: document.getElementById('stamp-deny'),
             rulebookBtn: document.getElementById('rulebook-btn'),
+            resetDocsBtn: document.getElementById('reset-docs-btn'),
             rulebookOverlay: document.getElementById('rulebook-overlay'),
             rulesList: document.getElementById('rules-list'),
             closeRulebook: document.querySelector('#rulebook-overlay .close-btn'),
@@ -323,6 +324,7 @@ class Game {
         this.dom.stampApprove.addEventListener('click', () => this.handleStamp('APPROVE'));
         this.dom.stampDeny.addEventListener('click', () => this.handleStamp('DENY'));
         this.dom.rulebookBtn.addEventListener('click', () => this.toggleRulebook(true));
+        this.dom.resetDocsBtn.addEventListener('click', () => this.resetDocumentPositions());
         this.dom.closeRulebook.addEventListener('click', () => this.toggleRulebook(false));
         this.dom.nextDayBtn.addEventListener('click', () => this.nextDay());
         this.dom.questionPurpose.addEventListener('click', () => this.askQuestion('purpose'));
@@ -537,6 +539,16 @@ class Game {
     handlePointerUp() {
         if (!this.activeDoc) return;
         this.activeDoc.style.zIndex = 10;
+        this.activeDoc = null;
+    }
+
+    resetDocumentPositions() {
+        const documents = this.dom.desk.querySelectorAll('.document');
+        documents.forEach((doc, index) => {
+            doc.style.left = `${60 + index * 34}px`;
+            doc.style.top = `${84 + index * 16}px`;
+            doc.style.zIndex = 10;
+        });
         this.activeDoc = null;
     }
 
